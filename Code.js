@@ -12,7 +12,7 @@ var OOFThreads = [],
     filters = userProperties.getProperty("filters") || "",
     isRegex = userProperties.getProperty("isRegex") || "false",
     isCaseSensitive = userProperties.getProperty("isCaseSensitive") || "false",
-    status = userProperties.getProperty("status") || "false";
+    status = userProperties.getProperty("status") || "disabled";
 
 
 user_email = Session.getEffectiveUser().getEmail();
@@ -30,7 +30,7 @@ function doGet(e){
     
     var content = "<p>"+scriptName+" has been installed on your email " + user_email + ". "
     + "It is currently set to label auto-reply emails every "+checkFrequency_MINUTE+" minutes.</p>"
-    + '<p>You can change these settings by clicking the WAT Suite extension icon or WAT Settings on gmail.</p>';
+    + '<p>You can change these settings by clicking the HOPLA Tools extension icon or HOPLA Tools Settings on gmail.</p>';
 
 
     
@@ -65,7 +65,7 @@ function doGet(e){
     checkFrequency_MINUTE = userProperties.getProperty("checkFrequency_MINUTE");
     
     deleteAllTriggers()
-    if (e.parameter.status == 'true'){
+    if (e.parameter.status == 'enabled'){
       ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
     }
     return ContentService.createTextOutput("settings has been saved.");
@@ -81,12 +81,12 @@ function doGet(e){
     
   }
   else if (e.parameter.autoreplies_disable){ //DISABLE
-    userProperties.setProperty("status","false")
+    userProperties.setProperty("status","disabled")
     deleteAllTriggers()
     return ContentService.createTextOutput("Triggers has been disabled.");
   }
   else if (e.parameter.autoreplies_enable){ //ENABLE
-    userProperties.setProperty("status","true")
+    userProperties.setProperty("status","enabled")
     deleteAllTriggers();    
     ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
     return ContentService.createTextOutput("Triggers has been enabled.");    
@@ -99,9 +99,9 @@ function doGet(e){
    }else{
      var triggers = ScriptApp.getProjectTriggers();        
      if (triggers.length != 1){
-       status = "false";
+       status = "disabled";
      }else{
-       status = "true";
+       status = "enabled";
      }
    }
     
@@ -139,7 +139,7 @@ function doGet(e){
     
     var content = "<p>"+scriptName+" has been installed on your email " + user_email + ". "
     + "It is currently set to label auto-reply emails every "+checkFrequency_MINUTE+" minutes.</p>"
-    + '<p>You can change these settings by clicking the WAT Suite extension icon or WAT Settings on gmail.</p>';
+    + '<p>You can change these settings by clicking the HOPLA Tools extension icon or HOPLA Tools Settings on gmail.</p>';
     
     ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
     
@@ -167,7 +167,7 @@ function deleteAllTriggers(){
 
 
 
-function label_autoreplies(){
+function label_autoreplies(){  
   Logger.log("label_autoreplies started for " + user_email);
   d = new Date();
   Logger.log("maxTime="+maxTime);
