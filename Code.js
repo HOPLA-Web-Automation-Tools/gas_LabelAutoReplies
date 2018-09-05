@@ -26,7 +26,7 @@ function doGet(e){
   if (e.parameter.setup){ //SETUP    
     deleteAllTriggers()
     
-    ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
+//    ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
     
     var content = "<p>"+scriptName+" has been installed on your email " + user_email + ". "
     + "It is currently set to label auto-reply emails every "+checkFrequency_MINUTE+" minutes.</p>"
@@ -167,7 +167,7 @@ function deleteAllTriggers(){
 
 
 
-function label_autoreplies(){  
+function label_autoreplies(){
   Logger.log("label_autoreplies started for " + user_email);
   d = new Date();
   Logger.log("maxTime="+maxTime);
