@@ -13,16 +13,31 @@ var filters = userProperties.getProperty("filters") || "";
 var isRegex = userProperties.getProperty("isRegex") || "false";
 var isCaseSensitive = userProperties.getProperty("isCaseSensitive") || "false";
 var script_status = userProperties.getProperty("status") || "disabled";
-
-
 var user_email = Session.getEffectiveUser().getEmail();
+
+useCustomFilters = userProperties.getProperty("useCustomFilters") || 0;
+filters = userProperties.getProperty("filters") || "";
+isRegex = userProperties.getProperty("isRegex") || 0;
+
+global.doGet = doGet;
+global.test = test;
+global.deleteAllTriggers = deleteAllTriggers;
+global.label_autoreplies = label_autoreplies;
+global.regex_rawBody = regex_rawBody;
+global.regex_subject = regex_subject;
+global.markLabel = markLabel;
+global.archive = archive;
+global.threadHasLabel = threadHasLabel;
+global.isMe = isMe;
+global.getEmailAddresses = getEmailAddresses;
+global.getLabel = getLabel;
 
 function test() {
   Logger.log(userProperties.getProperty("status"));
   // var authInfo = ScriptApp.getAuthorizationInfo(ScriptApp.AuthMode.FULL)
   // return HtmlService.createHtmlOutput(authInfo.getAuthorizationStatus());
 }
-global.doGet = doGet;
+
 function doGet(e) {
   if (e.parameter.setup) { // SETUP
     deleteAllTriggers();
@@ -224,9 +239,6 @@ function label_autoreplies() {
   return OOFThreads.length;
 }
 
-useCustomFilters = userProperties.getProperty("useCustomFilters") || 0;
-filters = userProperties.getProperty("filters") || "";
-isRegex = userProperties.getProperty("isRegex") || 0;
 
 function regex_rawBody(pBody) {
   if (useCustomFilters === 1) {
