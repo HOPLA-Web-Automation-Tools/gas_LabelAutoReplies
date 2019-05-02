@@ -53,14 +53,15 @@ function doGet(e) {
     var authInfo = ScriptApp.getAuthorizationInfo(ScriptApp.AuthMode.FULL);
     return HtmlService.createHtmlOutput(authInfo.getAuthorizationStatus());
   } else if (e.parameter.autoreplies_saveVariables) { // SET VARIABLES
-    userProperties.setProperty("labelName", e.parameter.labelName || labelName);
-    userProperties.setProperty("maxTime", e.parameter.maxTime || maxTime);
-    userProperties.setProperty("checkFrequency_MINUTE", (e.parameter.checkFrequency_MINUTE) || checkFrequency_MINUTE);
-    userProperties.setProperty("filters", e.parameter.filters || "");
-    userProperties.setProperty("useCustomFilters", e.parameter.useCustomFilters);
-    userProperties.setProperty("isRegex", e.parameter.regex);
-    userProperties.setProperty("isCaseSensitive", e.parameter.isCaseSensitive);
-    userProperties.setProperty("status", e.parameter.status || script_status);
+    var oSave = JSON.parse(e.parameter.autoreplies_saveVariables);
+    userProperties.setProperty("labelName", oSave.labelName || labelName);
+    userProperties.setProperty("maxTime", oSave.maxTime || maxTime);
+    userProperties.setProperty("checkFrequency_MINUTE", (oSave.checkFrequency_MINUTE) || checkFrequency_MINUTE);
+    userProperties.setProperty("filters", oSave.filters || "");
+    userProperties.setProperty("useCustomFilters", oSave.useCustomFilters);
+    userProperties.setProperty("isRegex", oSave.isRegex);
+    userProperties.setProperty("isCaseSensitive", oSave.isCaseSensitive);
+    userProperties.setProperty("status", oSave.status || script_status);
 
     useCustomFilters = userProperties.getProperty("useCustomFilters") || "false";
     filters = userProperties.getProperty("filters") || "";
