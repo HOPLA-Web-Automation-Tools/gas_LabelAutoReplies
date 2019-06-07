@@ -53,14 +53,15 @@ function doGet(e) {
     var authInfo = ScriptApp.getAuthorizationInfo(ScriptApp.AuthMode.FULL);
     return HtmlService.createHtmlOutput(authInfo.getAuthorizationStatus());
   } else if (e.parameter.autoreplies_saveVariables) { // SET VARIABLES
-    userProperties.setProperty("labelName", e.parameter.labelName || labelName);
-    userProperties.setProperty("maxTime", e.parameter.maxTime || maxTime);
-    userProperties.setProperty("checkFrequency_MINUTE", (e.parameter.checkFrequency_MINUTE) || checkFrequency_MINUTE);
-    userProperties.setProperty("filters", e.parameter.filters || "");
-    userProperties.setProperty("useCustomFilters", e.parameter.useCustomFilters);
-    userProperties.setProperty("isRegex", e.parameter.regex);
-    userProperties.setProperty("isCaseSensitive", e.parameter.isCaseSensitive);
-    userProperties.setProperty("status", e.parameter.status || script_status);
+    var oSave = JSON.parse(e.parameter.autoreplies_saveVariables);
+    userProperties.setProperty("labelName", oSave.labelName || labelName);
+    userProperties.setProperty("maxTime", oSave.maxTime || maxTime);
+    userProperties.setProperty("checkFrequency_MINUTE", (oSave.checkFrequency_MINUTE) || checkFrequency_MINUTE);
+    userProperties.setProperty("filters", oSave.filters || "");
+    userProperties.setProperty("useCustomFilters", oSave.useCustomFilters);
+    userProperties.setProperty("isRegex", oSave.isRegex);
+    userProperties.setProperty("isCaseSensitive", oSave.isCaseSensitive);
+    userProperties.setProperty("status", oSave.status || script_status);
 
     useCustomFilters = userProperties.getProperty("useCustomFilters") || "false";
     filters = userProperties.getProperty("filters") || "";
@@ -75,10 +76,14 @@ function doGet(e) {
     labelName = userProperties.getProperty("labelName");
     maxTime = userProperties.getProperty("maxTime");
     checkFrequency_MINUTE = userProperties.getProperty("checkFrequency_MINUTE");
-
+    checkFrequency_MINUTE = parseInt(checkFrequency_MINUTE, 10);
     deleteAllTriggers();
-    if (e.parameter.status === 'enabled') {
-      ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
+    if (oSave.status === 'enabled') {
+      if (checkFrequency_MINUTE === 60) {
+        ScriptApp.newTrigger("label_autoreplies").timeBased().everyHours(1).create();
+      } else {
+        ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
+      }
     }
     return ContentService.createTextOutput("settings has been saved.");
   } else if (e.parameter.autoreplies_trigger) { // DO IT NOW
@@ -95,7 +100,11 @@ function doGet(e) {
   } else if (e.parameter.autoreplies_enable) { // ENABLE
     userProperties.setProperty("status", "enabled");
     deleteAllTriggers();
-    ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
+    if (checkFrequency_MINUTE === 60) {
+      ScriptApp.newTrigger("label_autoreplies").timeBased().everyHours(1).create();
+    } else {
+      ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
+    }
     return ContentService.createTextOutput("Triggers has been enabled.");
   } else if (e.parameter.autoreplies_getVariables) { // GET VARIABLES
     var status;
@@ -104,18 +113,20 @@ function doGet(e) {
       status = 're-authorize';
     } else {
       var triggers = ScriptApp.getProjectTriggers();
-      if (triggers.length !== 1) {
-        status = "disabled";
-      } else {
-        status = "enabled";
-      }
+      status = triggers.length > 0 ? 'enabled' : 'disabled';
     }
 
     Logger.log("GET: " + userProperties.getProperty("useCustomFilters"));
+
+    var maxTime = userProperties.getProperty("maxTime") || 10;
+    maxTime = parseInt(maxTime, 10);
+    var checkFrequency_MINUTE = userProperties.getProperty("checkFrequency_MINUTE") || 10;
+    checkFrequency_MINUTE = parseInt(checkFrequency_MINUTE, 10);
+
     var resjson = {
       'labelName': userProperties.getProperty("labelName") || 'Auto Replies',
-      'maxTime': userProperties.getProperty("maxTime") || 10,
-      'checkFrequency_MINUTE': userProperties.getProperty("checkFrequency_MINUTE") || 10,
+      'maxTime': maxTime,
+      'checkFrequency_MINUTE': checkFrequency_MINUTE,
       'useCustomFilters': userProperties.getProperty("useCustomFilters") || false,
       'filters': userProperties.getProperty("filters") || "",
       'isRegex': userProperties.getProperty("isRegex") || false,
@@ -145,7 +156,11 @@ function doGet(e) {
     + "It is currently set to label auto-reply emails every " + checkFrequency_MINUTE + " minutes.</p>"
     + '<p>You can change these settings by clicking the HOPLA Tools extension icon or HOPLA Tools Settings on gmail.</p>';
 
-    ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
+    if (checkFrequency_MINUTE === 60) {
+      ScriptApp.newTrigger("label_autoreplies").timeBased().everyHours(1).create();
+    } else {
+      ScriptApp.newTrigger("label_autoreplies").timeBased().everyMinutes(checkFrequency_MINUTE).create();
+    }
 
     var HTMLOutput = HtmlService.createHtmlOutput();
     HTMLOutput.append(style);
