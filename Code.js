@@ -14,6 +14,7 @@ var isRegex = userProperties.getProperty("isRegex") || "false";
 var isCaseSensitive = userProperties.getProperty("isCaseSensitive") || "false";
 var script_status = userProperties.getProperty("status") || "disabled";
 var user_email = Session.getEffectiveUser().getEmail();
+var skipInbox = userProperties.getProperty("skipInbox") || "false";
 
 useCustomFilters = userProperties.getProperty("useCustomFilters") || 0;
 filters = userProperties.getProperty("filters") || "";
@@ -62,6 +63,7 @@ function doGet(e) {
     userProperties.setProperty("isRegex", oSave.isRegex);
     userProperties.setProperty("isCaseSensitive", oSave.isCaseSensitive);
     userProperties.setProperty("status", oSave.status || script_status);
+    userProperties.setProperty("skipInbox", oSave.skipinbox ? "true" : "false");
 
     useCustomFilters = userProperties.getProperty("useCustomFilters") || "false";
     filters = userProperties.getProperty("filters") || "";
@@ -122,7 +124,7 @@ function doGet(e) {
     maxTime = parseInt(maxTime, 10);
     var checkFrequency_MINUTE = userProperties.getProperty("checkFrequency_MINUTE") || 10;
     checkFrequency_MINUTE = parseInt(checkFrequency_MINUTE, 10);
-
+    skipInbox = skipInbox !== "false";
     var resjson = {
       'labelName': userProperties.getProperty("labelName") || 'Auto Replies',
       'maxTime': maxTime,
@@ -131,7 +133,8 @@ function doGet(e) {
       'filters': userProperties.getProperty("filters") || "",
       'isRegex': userProperties.getProperty("isRegex") || false,
       'isCaseSensitive': userProperties.getProperty("isCaseSensitive") || false,
-      'status': status
+      'status': status,
+      'skipinbox': skipInbox || false
     };
     return ContentService.createTextOutput(JSON.stringify(resjson));
   } else { // NO PARAMETERS
@@ -242,14 +245,18 @@ function label_autoreplies() {
   } catch (e) {
     Logger.log("error = %s", e);
   }
-  Logger.log("Archiving threads started.");
-  try {
-    archive(OOFThreads);
-  } catch (e) {
-    Logger.log("error = %s", e);
+  Logger.log("Labeling done..");
+
+  if (skipInbox !== "false") {
+    Logger.log("Archiving threads started.");
+    try {
+      archive(OOFThreads);
+      Logger.log("Archiving done..");
+    } catch (e) {
+      Logger.log("error = %s", e);
+    }
   }
 
-  Logger.log("Labeling and archiving done..");
   Logger.log('Labeled ' + OOFThreads.length + ' threads as autoreplies.');
   return OOFThreads.length;
 }
